@@ -1,5 +1,8 @@
+import { PrismaClient } from '@prisma/client';
 import { SensorsRepository, SensorDataInput } from '../repositories/sensors.repository';
 import { getIO } from '../socket';
+
+const prisma = new PrismaClient();
 
 // ── Thresholds (match ESP32 calculateSpoilageScore logic exactly) ────────────
 export const THRESHOLDS = {
@@ -252,12 +255,9 @@ export class SensorsService {
 
     // ── Connect Sensor Processing with Food Inventory, NGO Surplus & Rider Logistics ──
     try {
-      const { PrismaClient } = await import('@prisma/client');
-      const prismaClient = new PrismaClient();
-
       if (detection.status === 'GOOD') {
         // Food is SAFE / Fresh! Look for available surplus container linked to this sensor
-        const availableSurplus = await prismaClient.surplus.findFirst({
+        const availableSurplus = await prisma.surplus.findFirst({
           where: {
             status: 'AVAILABLE',
             OR: [
@@ -270,22 +270,22 @@ export class SensorsService {
 
         if (availableSurplus) {
           // 1. Assign deviceId and advance surplus to MATCHED
-          await prismaClient.surplus.update({
+          await prisma.surplus.update({
             where: { id: availableSurplus.id },
             data: { status: 'MATCHED', deviceId: deviceId }
           });
 
           // 2. Select eligible NGO
-          const targetNgo = await prismaClient.nGO.findFirst();
+          const targetNgo = await prisma.nGO.findFirst();
 
           if (targetNgo) {
             // 3. Create or update Redistribution
-            let redistribution = await prismaClient.redistribution.findFirst({
+            let redistribution = await prisma.redistribution.findFirst({
               where: { surplusId: availableSurplus.id }
             });
 
             if (!redistribution) {
-              redistribution = await prismaClient.redistribution.create({
+              redistribution = await prisma.redistribution.create({
                 data: {
                   surplusId: availableSurplus.id,
                   ngoId: targetNgo.id,
@@ -296,12 +296,12 @@ export class SensorsService {
             }
 
             // 4. Create or ensure Delivery is PENDING (ready for riders to claim)
-            let delivery = await prismaClient.delivery.findUnique({
+            let delivery = await prisma.delivery.findUnique({
               where: { redistributionId: redistribution.id }
             });
 
             if (!delivery) {
-              delivery = await prismaClient.delivery.create({
+              delivery = await prisma.delivery.create({
                 data: {
                   redistributionId: redistribution.id,
                   driverId: null,
@@ -324,13 +324,13 @@ export class SensorsService {
         }
       } else if (detection.status === 'SPOILED') {
         // 1. Mark safe inventory in kitchen as QUALITY_WARNING / EXPIRED
-        await prismaClient.inventoryItem.updateMany({
+        await prisma.inventoryItem.updateMany({
           where: { status: 'SAFE' },
           data: { status: 'QUALITY_WARNING' }
         }).catch(() => null);
 
         // 2. Automatically cancel and retract any surplus food linked to this container/kitchen!
-        const spoiledSurpluses = await prismaClient.surplus.findMany({
+        const spoiledSurpluses = await prisma.surplus.findMany({
           where: {
             OR: [
               { deviceId: deviceId },
@@ -346,19 +346,19 @@ export class SensorsService {
         });
 
         for (const s of spoiledSurpluses) {
-          await prismaClient.surplus.update({
+          await prisma.surplus.update({
             where: { id: s.id },
             data: { status: 'EXPIRED' }
           }).catch(() => null);
 
           for (const r of s.redistributions) {
-            await prismaClient.redistribution.update({
+            await prisma.redistribution.update({
               where: { id: r.id },
               data: { status: 'CANCELLED' }
             }).catch(() => null);
 
             if (r.delivery) {
-              await prismaClient.delivery.update({
+              await prisma.delivery.update({
                 where: { id: r.delivery.id },
                 data: { status: 'CANCELLED' }
               }).catch(() => null);
@@ -379,7 +379,7 @@ export class SensorsService {
         }
       } else if (detection.status === 'CAUTION') {
         // Mark items approaching risk as EXPIRING_SOON
-        await prismaClient.inventoryItem.updateMany({
+        await prisma.inventoryItem.updateMany({
           where: { status: 'SAFE' },
           data: { status: 'EXPIRING_SOON' }
         }).catch(() => null);
