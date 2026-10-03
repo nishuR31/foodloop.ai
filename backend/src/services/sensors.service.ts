@@ -195,6 +195,7 @@ export class SensorsService {
   }
 
   // ── Ingest ESP32 payload ──────────────────────────────────────────────────
+  async ingestSensorData(raw: Record<string, any>) {
     const temp: number = Number(raw.temperature_c ?? raw.temperature ?? raw.temp ?? 0);
     const hum: number  = Number(raw.humidity_pct ?? raw.humidity ?? raw.hum ?? 0);
     const mq2Raw: number = Number(raw.mq2_raw ?? raw.mq2Raw ?? 0);
