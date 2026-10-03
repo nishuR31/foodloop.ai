@@ -1,1 +1,0 @@
-{"version":3,"file":"ngo.service.d.ts","sourceRoot":"","sources":["../../src/services/ngo.service.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,kBAAkB,EAAE,MAAM,uBAAuB,CAAC;AAK3D,qBAAa,UAAU;IACf,mBAAmB,CAAC,IAAI,CAAC,EAAE,GAAG;;;;;;;;;;;;;;;;;;;IAsBpC,OAAO,CAAC,yBAAyB;IAY3B,iBAAiB,CAAC,IAAI,EAAE,GAAG;;;;IAe3B,aAAa,CAAC,IAAI,EAAE,GAAG,EAAE,KAAK,EAAE,kBAAkB;;;;;;;;;CAczD"}
