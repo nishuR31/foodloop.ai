@@ -17,7 +17,6 @@
 !.gitignore
 !**/.gitignore
 !.dockerignore
-!**/.dockerignore
 !.env.example
 !**/.env.example
 
