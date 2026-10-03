@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 // NEXT_PUBLIC_ prefix required for Next.js to expose this to the browser bundle
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const cleanUrl = rawUrl.replace(/\/+$/, '');
+const API_BASE = cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
 
 export const api = axios.create({
   baseURL: API_BASE,

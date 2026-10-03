@@ -31,7 +31,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const socketInstance = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001', {
+    const rawSocketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const cleanSocketUrl = rawSocketUrl.replace(/\/+$/, '').replace(/\/api$/, '');
+    const socketInstance = io(cleanSocketUrl, {
       withCredentials: true,
       autoConnect: true,
       transports: ['websocket'],
