@@ -6,17 +6,17 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Install deps first (layer-cached until package files change)
+# Install deps and copy prisma schemas so postinstall can generate client
 COPY package.json bun.lock* ./
+COPY prisma ./prisma
 RUN bun install --frozen-lockfile
 
 # Copy source
 COPY tsconfig.json ./
-COPY prisma ./prisma
 COPY src ./src
 
-# Generate Prisma client
-RUN bunx prisma generate --schema=prisma/schema.prisma
+# Generate Prisma clients for both schemas
+RUN bunx prisma generate --schema=prisma/schema.prisma && bunx prisma generate --schema=prisma/audit.prisma
 
 # Compile TypeScript → dist/
 RUN bun run build
