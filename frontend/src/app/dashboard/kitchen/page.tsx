@@ -51,9 +51,18 @@ export default function KitchenDashboard() {
     queryKey: ['sensors'],
     queryFn: async () => {
       const res = await api.get('/sensors');
-      return res.data.data;
+      return res.data;
     },
-    refetchInterval: 5000
+    refetchInterval: 3000
+  });
+
+  const { data: directSensLatest } = useQuery({
+    queryKey: ['sensors-latest-direct'],
+    queryFn: async () => {
+      const res = await api.get('/sensors/latest');
+      return res.data?.data;
+    },
+    refetchInterval: 3000
   });
 
   const { data: recRes, isLoading: loadingRec } = useQuery({
@@ -128,7 +137,7 @@ export default function KitchenDashboard() {
   const data = dashRes ? { ...dashRes, leaderboard: leadRes } : null;
   const inventory = invRes || [];
   const sensors = sensRes?.data || [];
-  const iotLatest = liveSensor || sensRes?.iotLatest;
+  const iotLatest = liveSensor || sensRes?.iotLatest || directSensLatest;
   const recommendations = recRes || [];
   const deliveries = delRes || [];
 

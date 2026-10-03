@@ -107,11 +107,21 @@ export class SensorsController {
   }
 
   // ── GET /api/sensors/latest (public / direct IoT latest status) ──────────
+  // ── GET /api/sensors/latest (public / direct IoT latest status) ──────────
   async getLatest(_request: FastifyRequest, reply: FastifyReply) {
     const devices = await svc.getKnownDevices();
-    const firstDevice = devices[0] || 'ESP32_FOOD_001';
-    const latest = await svc.getLatestByDevice(firstDevice);
-    return reply.send({ success: true, deviceId: firstDevice, data: latest });
+    const firstDevice = devices[0];
+    let latest = firstDevice ? await svc.getLatestByDevice(firstDevice) : null;
+    if (!latest) {
+      latest = await prisma.foodSpoilageSensorData.findFirst({
+        orderBy: { createdAt: 'desc' },
+      });
+    }
+    return reply.send({
+      success: true,
+      deviceId: latest?.deviceId || firstDevice || 'ESP32_FOOD_001',
+      data: latest,
+    });
   }
 
   // ── GET /api/sensors  (protected — dashboard, shows kitchen sensors & IoT) ──
@@ -135,9 +145,19 @@ export class SensorsController {
 
     // Enrich with the latest ESP32 IoT reading
     const devices = await svc.getKnownDevices();
-    const firstDevice = devices[0] || 'ESP32_FOOD_001';
-    const iotLatest = await svc.getLatestByDevice(firstDevice);
+    const firstDevice = devices[0];
+    let iotLatest = firstDevice ? await svc.getLatestByDevice(firstDevice) : null;
+    if (!iotLatest) {
+      iotLatest = await prisma.foodSpoilageSensorData.findFirst({
+        orderBy: { createdAt: 'desc' },
+      });
+    }
 
-    return reply.send({ success: true, data: sensors, iotLatest, deviceId: firstDevice });
+    return reply.send({
+      success: true,
+      data: sensors,
+      iotLatest,
+      deviceId: iotLatest?.deviceId || firstDevice || 'ESP32_FOOD_001',
+    });
   }
 }

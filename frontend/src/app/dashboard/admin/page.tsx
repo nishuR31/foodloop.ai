@@ -8,6 +8,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
 
+import IoTFoodQualityCard from '@/components/IoTFoodQualityCard';
+
 const GlobalHeatmap = dynamic(() => import('@/components/Map/GlobalHeatmap'), { ssr: false });
 
 export default function AdminDashboard() {
@@ -124,12 +126,19 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">System Overview</h1>
-          <p className="text-slate-500 mt-1">Monitor the pulse of the FoodLoop network.</p>
+          <p className="text-slate-500 mt-1">Monitor the pulse of the FoodLoop network and real-time food safety.</p>
         </div>
         <button onClick={handleGenerateReport} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/30 text-sm font-semibold hover:scale-105 hover:shadow-emerald-500/40 transition-all duration-300 ease-in-out">
           Generate Full Report
         </button>
       </div>
+
+      {/* Real-time Hardware IoT Food Quality Telemetry */}
+      <IoTFoodQualityCard
+        title="Network-Wide Food Spoilage & Quality Node"
+        subtitle="Live telemetry streamed from connected container sensors (DHT22, MQ-2, MQ-3)"
+        contextTag="IoT Hardware Hub"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {[

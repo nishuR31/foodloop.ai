@@ -9,6 +9,8 @@ import dynamic from 'next/dynamic';
 import { useSocket } from '@/components/SocketProvider';
 import { useEffect } from 'react';
 
+import IoTFoodQualityCard from '@/components/IoTFoodQualityCard';
+
 const RouteMap = dynamic(() => import('@/components/Map/RouteMap'), { ssr: false });
 
 export default function DriverDashboard() {
@@ -93,9 +95,16 @@ export default function DriverDashboard() {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Driver Dashboard</h1>
-          <p className="text-slate-500 mt-1">Manage your active deliveries and optimized routes.</p>
+          <p className="text-slate-500 mt-1">Manage your active deliveries and monitor in-transit food condition.</p>
         </div>
       </div>
+
+      {/* Real-time In-Transit Food Quality & Spoilage Monitor */}
+      <IoTFoodQualityCard
+        title="Vehicle Storage Container Freshness Monitor"
+        subtitle="Real-time multi-sensor telemetry during transit (DHT22 + MQ-2 + MQ-3)"
+        contextTag="In-Transit Cargo"
+      />
 
       {/* Live Map Section */}
       <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-3xl shadow-xl shadow-slate-200/50 p-6">
