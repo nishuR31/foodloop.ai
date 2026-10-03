@@ -146,7 +146,7 @@ export default function IoTFoodQualityCard({
                 Safety Assessment: {isSpoiled ? 'Decomposition Detected' : isCaution ? 'Elevated Environmental Risk' : 'Fresh & Certified Safe'}
               </span>
               <span className="font-mono text-slate-400">
-                {score <= 20 ? 'Optimal' : score <= 40 ? 'Moderate' : 'Critical'}
+                {score === null ? 'Standby' : score <= 20 ? 'Optimal' : score <= 40 ? 'Moderate' : 'Critical'}
               </span>
             </div>
             {/* Progress bar */}
@@ -159,7 +159,7 @@ export default function IoTFoodQualityCard({
                     ? 'bg-amber-500'
                     : 'bg-emerald-500'
                 }`}
-                style={{ width: `${Math.min(score, 100)}%` }}
+                style={{ width: `${Math.min(score ?? 0, 100)}%` }}
               ></div>
             </div>
           </div>
