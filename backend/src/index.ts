@@ -180,12 +180,30 @@ const start = async () => {
   try {
     setupSocket(server);
     await server.ready();
-    await server.listen({ port: Number(process.env.PORT) || 3001, host: '0.0.0.0' });
-    server.log.info(`Server running on port ${process.env.PORT || 3001}`);
+    const port = Number(process.env.PORT) || 3001;
+    await server.listen({ port, host: '0.0.0.0' });
+    server.log.info(`Server running on port ${port}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);
   }
 };
+
+// Graceful shutdown on SIGTERM / SIGINT (e.g. Render container cycling)
+const handleShutdown = async (signal: string) => {
+  server.log.info(`[Process] Received ${signal}. Closing server gracefully...`);
+  try {
+    await server.close();
+    await prisma.$disconnect();
+    server.log.info('[Process] Closed all connections cleanly.');
+    process.exit(0);
+  } catch (err) {
+    server.log.error(err, '[Process] Error during shutdown');
+    process.exit(1);
+  }
+};
+
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+process.on('SIGINT', () => handleShutdown('SIGINT'));
 
 start();

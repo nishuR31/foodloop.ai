@@ -43,4 +43,4 @@ EXPOSE 3001
 # Non-root user for security
 USER bun
 
-CMD ["bun", "run", "start"]
+CMD ["bun", "run", "./dist/index.js"]
