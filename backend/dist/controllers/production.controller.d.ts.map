@@ -1,0 +1,1 @@
+{"version":3,"file":"production.controller.d.ts","sourceRoot":"","sources":["../../src/controllers/production.controller.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAOvD,qBAAa,oBAAoB;IACzB,gBAAgB,CAAC,OAAO,EAAE,cAAc,EAAE,KAAK,EAAE,YAAY;IAM7D,iBAAiB,CAAC,OAAO,EAAE,cAAc,EAAE,KAAK,EAAE,YAAY;CAKrE"}

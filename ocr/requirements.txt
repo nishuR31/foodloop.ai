@@ -1,0 +1,9 @@
+fastapi>=0.110.0
+uvicorn>=0.27.0
+paddleocr>=2.7.0
+paddlepaddle>=2.6.0
+Pillow>=10.0.0
+python-multipart>=0.0.9
+pydantic>=2.0.0
+numpy>=1.24.0
+pyzbar>=0.1.9

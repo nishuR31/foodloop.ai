@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  ocr-service:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OCR_HOST=0.0.0.0
+      - OCR_PORT=8000
+      - OCR_LOG_LEVEL=INFO
+      - OCR_DEVICE=cpu
+      - OCR_LANG=en
+      - OCR_MAX_FILE_SIZE_MB=10
+      - OCR_SERVICE_API_KEY=dev_ocr_secret_key_123
+    restart: unless-stopped

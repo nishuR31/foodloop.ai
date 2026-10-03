@@ -1,0 +1,332 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+  directUrl= env("DIRECT_URL")
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  type      String   // KITCHEN, NGO, ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  kitchens  Kitchen[]
+  ngos      NGO[]
+}
+
+model User {
+  id             String       @id @default(uuid())
+  email          String       @unique
+  passwordHash   String
+  name           String
+  role           String       // ADMIN, KITCHEN_MANAGER, NGO_STAFF, DRIVER
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  resetToken     String?
+  resetTokenExpiry DateTime?
+
+  driver         Driver?
+  refreshTokens  RefreshToken[]
+  passkeys       Passkey[]
+  oauthAccounts  OAuthAccount[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Passkey {
+  id           String   @id @default(uuid())
+  credentialId String   @unique
+  publicKey    Bytes
+  counter      BigInt
+  transports   String?
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+model OAuthAccount {
+  id                String   @id @default(uuid())
+  provider          String
+  providerAccountId String
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  createdAt         DateTime @default(now())
+
+  @@unique([provider, providerAccountId])
+}
+
+model Kitchen {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  location       String
+  latitude       Float?
+  longitude      Float?
+
+  inventoryItems InventoryItem[]
+  productions    ProductionRecord[]
+  consumptions   ConsumptionRecord[]
+  surpluses      Surplus[]
+  sensors        Sensor[]
+  demandPredictions DemandPrediction[]
+}
+
+model NGO {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  location       String
+  latitude       Float?
+  longitude      Float?
+  capacity       Int?
+
+  redistributions Redistribution[]
+}
+
+model Driver {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id])
+  vehicleNo  String?
+  isAvailable Boolean @default(true)
+
+  deliveries Delivery[]
+}
+
+model InventoryItem {
+  id               String    @id @default(uuid())
+  kitchenId        String
+  kitchen          Kitchen   @relation(fields: [kitchenId], references: [id])
+  productName      String
+  category         String
+  quantity         Float
+  unit             String
+  batchNumber      String?
+  barcode          String?
+  manufacturingDate DateTime?
+  expiryDate       DateTime?
+  storageLocation  String?
+  storageTemperature Float?
+  status           String    @default("SAFE") // SAFE, EXPIRING_SOON, EXPIRED, LOW_STOCK, OUT_OF_STOCK, QUALITY_WARNING
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@index([kitchenId])
+  @@index([expiryDate])
+}
+
+model ProductionRecord {
+  id               String   @id @default(uuid())
+  kitchenId        String
+  kitchen          Kitchen  @relation(fields: [kitchenId], references: [id])
+  date             DateTime @default(now())
+  foodItem         String
+  quantityProduced Float
+  unit             String
+}
+
+model ConsumptionRecord {
+  id               String   @id @default(uuid())
+  kitchenId        String
+  kitchen          Kitchen  @relation(fields: [kitchenId], references: [id])
+  date             DateTime @default(now())
+  foodItem         String
+  quantityConsumed Float
+  unit             String
+}
+
+model Surplus {
+  id               String   @id @default(uuid())
+  kitchenId        String
+  kitchen          Kitchen  @relation(fields: [kitchenId], references: [id])
+  date             DateTime @default(now())
+  foodItem         String
+  quantitySurplus  Float
+  unit             String
+  status           String   @default("AVAILABLE") // AVAILABLE, MATCHED, REDISTRIBUTED, EXPIRED
+  deviceId         String?  // Linked IoT Sensor Container Node
+
+  redistributions  Redistribution[]
+
+  @@index([kitchenId])
+  @@index([status])
+  @@index([deviceId])
+}
+
+model DemandPrediction {
+  id                     String   @id @default(uuid())
+  kitchenId              String
+  kitchen                Kitchen  @relation(fields: [kitchenId], references: [id])
+  targetDate             DateTime
+  predictedDemand        Float
+  recommendedProduction  Float
+  expectedSurplus        Float
+  confidence             Float
+  aiReasoning            String?
+  createdAt              DateTime @default(now())
+}
+
+model Redistribution {
+  id               String   @id @default(uuid())
+  surplusId        String
+  surplus          Surplus  @relation(fields: [surplusId], references: [id])
+  ngoId            String
+  ngo              NGO      @relation(fields: [ngoId], references: [id])
+  quantityMatched  Float
+  status           String   @default("CREATED") // CREATED, MATCHED, ACCEPTED, PICKUP_SCHEDULED, PICKED_UP, IN_TRANSIT, DELIVERED, CANCELLED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  delivery         Delivery?
+
+  @@index([status])
+}
+
+model Delivery {
+  id               String   @id @default(uuid())
+  redistributionId String   @unique
+  redistribution   Redistribution @relation(fields: [redistributionId], references: [id])
+  driverId         String?
+  driver           Driver?  @relation(fields: [driverId], references: [id])
+  pickupTime       DateTime?
+  deliveryTime     DateTime?
+  status           String   @default("PENDING") // PENDING, ASSIGNED, PICKED_UP, IN_TRANSIT, DELIVERED
+  
+  route            Route?
+
+  @@index([status])
+  @@index([driverId])
+}
+
+model Route {
+  id               String   @id @default(uuid())
+  deliveryId       String   @unique
+  delivery         Delivery @relation(fields: [deliveryId], references: [id])
+  distanceKm       Float?
+  estimatedTimeMins Int?
+  polyline         String?
+}
+
+model Sensor {
+  id               String   @id @default(uuid())
+  kitchenId        String
+  kitchen          Kitchen  @relation(fields: [kitchenId], references: [id])
+  name             String
+  type             String   // TEMPERATURE, HUMIDITY
+  location         String
+  status           String   @default("ACTIVE") // ACTIVE, INACTIVE, ERROR
+
+  readings         SensorReading[]
+}
+
+model SensorReading {
+  id               String   @id @default(uuid())
+  sensorId         String
+  sensor           Sensor   @relation(fields: [sensorId], references: [id])
+  value            Float
+  timestamp        DateTime @default(now())
+  isAlertTriggered Boolean  @default(false)
+
+  @@index([sensorId])
+}
+
+model Alert {
+  id               String   @id @default(uuid())
+  title            String
+  message          String
+  severity         String   // INFO, WARNING, CRITICAL
+  createdAt        DateTime @default(now())
+  isResolved       Boolean  @default(false)
+}
+
+model AIRecommendation {
+  id               String   @id @default(uuid())
+  title            String
+  description      String
+  context          String?  // JSON string or reference to what this is about
+  createdAt        DateTime @default(now())
+}
+
+model ImpactMetric {
+  id               String   @id @default(uuid())
+  date             DateTime @default(now())
+  wastePreventedKg Float    @default(0)
+  mealsSaved       Int      @default(0)
+  co2eAvoidedKg    Float    @default(0)
+  waterSavedLiters Float    @default(0)
+  moneySaved       Float    @default(0)
+}
+
+model Notification {
+  id               String   @id @default(uuid())
+  userId           String?  // Nullable if broadcast
+  title            String
+  message          String
+  read             Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AiScan {
+  id             String   @id @default(uuid())
+  kitchenId      String?
+  item           String
+  confidence     Float
+  status         String
+  issues         String?
+  recommendation String?
+  createdAt      DateTime @default(now())
+}
+
+
+model AuditLog {
+  id               String   @id @default(uuid())
+  entityId         String   // The ID of the redistribution, delivery, or inventory item
+  entityType       String   // e.g., 'REDISTRIBUTION', 'DELIVERY', 'INVENTORY'
+  action           String   // e.g., 'MATCHED', 'PICKUP_SCANNED', 'DELIVERY_CONFIRMED'
+  actorId          String?  // The user who performed the action
+  details          String?  // JSON string with extra details (e.g., location, temperature, hash)
+  blockchainHash   String?  // Mock blockchain hash for immutability
+  createdAt        DateTime @default(now())
+}
+
+model FoodSpoilageSensorData {
+  id               String   @id @default(uuid())
+  deviceId         String
+  temperature      Float
+  humidity         Float
+  mq2Raw           Float
+  mq2Mv            Float?
+  mq3Raw           Float
+  mq3Mv            Float?
+  gasIndex         Float?
+  temperatureIndex Float?
+  humidityIndex    Float?
+  spoilageScore    Float
+  status           String
+  createdAt        DateTime @default(now())
+
+  @@index([deviceId])
+}

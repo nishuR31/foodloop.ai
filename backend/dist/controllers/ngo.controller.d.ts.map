@@ -1,0 +1,1 @@
+{"version":3,"file":"ngo.controller.d.ts","sourceRoot":"","sources":["../../src/controllers/ngo.controller.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAOvD,qBAAa,aAAa;IAClB,mBAAmB,CAAC,OAAO,EAAE,cAAc,EAAE,KAAK,EAAE,YAAY;IAKhE,iBAAiB,CAAC,OAAO,EAAE,cAAc,EAAE,KAAK,EAAE,YAAY;IAK9D,aAAa,CAAC,OAAO,EAAE,cAAc,EAAE,KAAK,EAAE,YAAY;CAKjE"}
