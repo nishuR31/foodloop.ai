@@ -2,7 +2,28 @@
 # FoodLoop AI - Root Git Ignore Configuration
 # ==========================================
 
-# Environment & Credentials
+# ------------------------------------------
+# All Hidden Dotfiles & Directories
+# (AI agents, editor state, OS cache, local envs)
+# ------------------------------------------
+.*
+.*/
+*/.*
+*/.*/
+*/**/.*
+*/**/.*/
+
+# Whitelist essential repository configuration files
+!.gitignore
+!**/.gitignore
+!.dockerignore
+!**/.dockerignore
+!.env.example
+!**/.env.example
+
+# ------------------------------------------
+# Environment & Sensitive Credentials
+# ------------------------------------------
 .env
 .env.*
 !.env.example
@@ -12,7 +33,9 @@
 *.cert
 cookies.txt
 
-# Node Dependencies & Package Managers
+# ------------------------------------------
+# Dependencies & Package Managers
+# ------------------------------------------
 node_modules/
 */node_modules/
 backend/node_modules/
@@ -25,7 +48,9 @@ frontend/node_modules/
 !.yarn/releases
 !.yarn/versions
 
-# Next.js & Frontend Builds
+# ------------------------------------------
+# Frontend & Next.js Builds
+# ------------------------------------------
 .next/
 */.next/
 frontend/.next/
@@ -35,7 +60,9 @@ frontend/out/
 build/
 */build/
 
+# ------------------------------------------
 # Backend Build & Prisma Generated Files
+# ------------------------------------------
 dist/
 */dist/
 backend/dist/
@@ -44,7 +71,9 @@ backend/prisma/seed.js.map
 backend/prisma/seed.d.ts
 backend/prisma/seed.d.ts.map
 
-# Python / OCR Build & Virtualenvs
+# ------------------------------------------
+# Python / OCR Cache & Virtualenvs
+# ------------------------------------------
 __pycache__/
 */__pycache__/
 */**/__pycache__/
@@ -59,33 +88,24 @@ venv/
 env/
 */env/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 .pytest_cache/
 .mypy_cache/
 
-# Executables & Large Binary Tools
+# ------------------------------------------
+# Executables & Binaries
+# ------------------------------------------
 *.exe
 *.bin
 *.dll
-frontend/bin/arduino-cli.exe
 frontend/bin/
+frontend/bin/arduino-cli.exe
 
+# ------------------------------------------
 # Logs & Debugging
+# ------------------------------------------
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -93,32 +113,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ------------------------------------------
 # Testing & Coverage
+# ------------------------------------------
 coverage/
 */coverage/
 .nyc_output/
 
+# ------------------------------------------
 # TypeScript
+# ------------------------------------------
 *.tsbuildinfo
-
-# OS Metadata
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# IDE & Editor Files
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# AI Agents & IDE Cache
-.agents/
-*/.agents/
-.context
-.gemini/
