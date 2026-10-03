@@ -195,12 +195,11 @@ export class SensorsService {
   }
 
   // ── Ingest ESP32 payload ──────────────────────────────────────────────────
-  async ingestSensorData(raw: Record<string, any>) {
-    const temp: number = raw.temperature_c ?? raw.temperature ?? 0;
-    const hum: number  = raw.humidity_pct ?? raw.humidity ?? 0;
-    const mq2Raw: number = raw.mq2_raw ?? 0;
-    const mq3Raw: number = raw.mq3_raw ?? 0;
-    const deviceId: string = raw.device_id ?? 'UNKNOWN';
+    const temp: number = Number(raw.temperature_c ?? raw.temperature ?? raw.temp ?? 0);
+    const hum: number  = Number(raw.humidity_pct ?? raw.humidity ?? raw.hum ?? 0);
+    const mq2Raw: number = Number(raw.mq2_raw ?? raw.mq2Raw ?? 0);
+    const mq3Raw: number = Number(raw.mq3_raw ?? raw.mq3Raw ?? 0);
+    const deviceId: string = String(raw.device_id ?? raw.deviceId ?? 'ESP32_FOOD_001');
 
     // ── Fresh Hot Food Gradual Lowering Slope Analysis ─────────────────────
     // From esp.ino: A fresh hot dish creates a rapid thermal/humidity transient.

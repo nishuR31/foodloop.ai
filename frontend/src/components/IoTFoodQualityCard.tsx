@@ -56,16 +56,17 @@ export default function IoTFoodQualityCard({
   // Prefer live WebSocket push, fallback to latest query reading
   const reading = liveData || sensorRes;
 
-  const status = reading?.status || 'GOOD';
-  const score = Number(reading?.spoilageScore ?? 15);
-  const temp = Number(reading?.temperature ?? 24.5).toFixed(1);
-  const hum = Number(reading?.humidity ?? 55.0).toFixed(1);
-  const mq2 = reading?.mq2Raw ?? 145;
-  const mq3 = reading?.mq3Raw ?? 180;
+  const hasData = Boolean(reading);
+  const status = reading?.status || (isLoading ? 'CONNECTING...' : 'STANDBY');
+  const score = reading?.spoilageScore != null ? Number(reading.spoilageScore) : null;
+  const temp = reading?.temperature != null ? Number(reading.temperature).toFixed(1) : '--';
+  const hum = reading?.humidity != null ? Number(reading.humidity).toFixed(1) : '--';
+  const mq2 = reading?.mq2Raw != null ? String(reading.mq2Raw) : '--';
+  const mq3 = reading?.mq3Raw != null ? String(reading.mq3Raw) : '--';
   const deviceId = reading?.deviceId || 'ESP32_FOOD_001';
 
-  const isSpoiled = status === 'SPOILED' || score > 50;
-  const isCaution = status === 'CAUTION' || (score >= 25 && score <= 50);
+  const isSpoiled = status === 'SPOILED' || (score !== null && score > 50);
+  const isCaution = status === 'CAUTION' || (score !== null && score >= 25 && score <= 50);
 
   const statusColor = isSpoiled
     ? 'bg-rose-500 text-white shadow-rose-500/20'
@@ -120,7 +121,7 @@ export default function IoTFoodQualityCard({
               Spoilage Score
             </span>
             <span className="text-xl sm:text-2xl font-black text-white">
-              {score.toFixed(1)}
+              {score !== null ? score.toFixed(1) : '--'}
               <span className="text-xs font-normal text-slate-400"> / 100</span>
             </span>
           </div>
