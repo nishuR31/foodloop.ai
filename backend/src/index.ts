@@ -44,8 +44,11 @@ server.register(helmet, { global: true, contentSecurityPolicy: false });
 server.register(cors, {
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
-    const allowed = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [];
-    if (allowed.includes(origin) || origin.startsWith('http://localhost:') || origin.endsWith('.vercel.app')) {
+    const allowed = `${process.env.FRONTEND_URL || ''},${process.env.CORS_ORIGIN || ''}`
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (allowed.length === 0 || allowed.includes(origin) || origin.startsWith('http://localhost:') || origin.endsWith('.vercel.app')) {
       return cb(null, true);
     }
     cb(null, false);
